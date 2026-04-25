@@ -175,40 +175,40 @@ const TOTAL_H = ZONE_HEIGHTS.reduce((a, b) => a + b, 0);
 
 const zones = [
   {
-    id: 0, name: 'Sunlight Zone', depth: '0 – 200m',
+    id: 0, name: 'Internet Backbone', depth: 'Surface Web',
     color: 0x1f8fc8, emissive: 0x126fb0,
     lightColor: 0x7fe6ff,
     y: 0,
-    title: 'Sunlight Zone (Epipelagic)',
-    desc: 'The sunlight zone stretches from the surface down to 200m. Sunlight penetrates fully here, enabling photosynthesis and supporting the richest biodiversity in the ocean. Home to colourful reef fish, dolphins, sharks, sea turtles, and vast schools of herring. The warm, well-lit waters teem with plankton that form the base of the marine food web.',
-    creatures: ['Dolphin', 'Shark', 'Sea Turtle', 'Clownfish', 'Jellyfish', 'Manta Ray']
+    title: 'Internet Backbone (Surface Layer)',
+    desc: 'The surface layer where most visible traffic flows. Public APIs, indexed databases and consumer-facing infrastructure. Traffic is fully exposed and monitored by major corporate nodes.',
+    creatures: ['HTTP/S Traffic', 'Public APIs', 'CDN Edges', 'Corporate Firewalls']
   },
   {
-    id: 1, name: 'Twilight Zone', depth: '200 – 1000m',
+    id: 1, name: 'Encrypted Grid', depth: 'Deep Web',
     color: 0x21427d, emissive: 0x13295a,
     lightColor: 0x5a7dff,
     y: -6,
-    title: 'Twilight Zone (Mesopelagic)',
-    desc: 'The twilight zone receives only faint, dim blue light. No photosynthesis occurs here, yet life thrives on marine snow — organic particles that drift down from above. Creatures like lanternfish, hatchetfish, and squid perform the largest daily migration on Earth, rising to feed at night and retreating to the dark by day. Many species are bioluminescent.',
-    creatures: ['Lanternfish', 'Hatchetfish', 'Firefly Squid', 'Swordfish', 'Oarfish']
+    title: 'Encrypted Grid (Deep Web)',
+    desc: 'Password-protected silos and internal corporate networks. Service daemons monitor all incoming requests. Unauthorized probes are silently logged and traced.',
+    creatures: ['Service Daemons', 'Encrypted Packets', 'Auth Gateways', 'VPN Tunnels']
   },
   {
-    id: 2, name: 'Midnight Zone', depth: '1000 – 4000m',
+    id: 2, name: 'Darknet Routing', depth: 'Onion Layer',
     color: 0x171a52, emissive: 0x0a0d2e,
     lightColor: 0x3f49c9,
     y: -11,
-    title: 'Midnight Zone (Bathypelagic)',
-    desc: 'Complete darkness, crushing pressure, and near-freezing temperatures define the midnight zone. No sunlight reaches here — bioluminescence is the only light source. The iconic anglerfish lures prey with its glowing lure. Viperfish have transparent fangs, and giant squid lurk in the black water. Most residents are black or red (invisible in these wavelengths).',
-    creatures: ['Anglerfish', 'Viperfish', 'Giant Squid', 'Gulper Eel', 'Dragonfish']
+    title: 'Darknet Routing (Onion Layer)',
+    desc: 'Anonymous peer-to-peer routing where traffic bounces across encrypted relays. Identity is obfuscated through layered cryptography. Intrusion detection systems scan for anomalous behavioral signatures.',
+    creatures: ['Onion Routers', 'P2P Nodes', 'Scrapers', 'Crypto Mixers']
   },
   {
-    id: 3, name: 'The Abyss', depth: '4000 – 6000m',
+    id: 3, name: 'Quantum Abyss', depth: 'Zero-Day Repository',
     color: 0x050816, emissive: 0x02040b,
     lightColor: 0x16245a,
     y: -16,
-    title: 'The Abyss (Abyssopelagic)',
-    desc: 'The abyss covers over 60% of the ocean floor. In total darkness and under immense pressure (over 600 atmospheres), specially adapted creatures survive on organic matter raining from above. Sea cucumbers drift across the sediment, tripod fish prop themselves on elongated fins, and giant isopods scavenge the barren plains. Hydrothermal vents create oases of chemosynthetic life.',
-    creatures: ['Sea Cucumber', 'Tripod Fish', 'Giant Isopod', 'Dumbo Octopus', 'Grenadier Fish']
+    title: 'Quantum Abyss (Zero-Day Repository)',
+    desc: 'Uncharted network depths housing zero-day exploits, APTs and experimental quantum decryption algorithms. Rogue AI fragments operate autonomously. No signal returns from the deepest nodes.',
+    creatures: ['APT Entities', 'Polymorphic Code', 'Quantum Keys', 'Rogue AI Fragments']
   }
 ];
 
@@ -245,10 +245,10 @@ let _cachedTitleGroup = null; // cached reference — avoids scene.getObjectByNa
     // "OCEAN" — massive top line
     ctx.font      = '900 480px Inter, sans-serif';
     ctx.fillStyle = fillStyle;
-    ctx.fillText('OCEAN', w / 2, h * 0.34);
+    ctx.fillText('INTERNET', w / 2, h * 0.34);
     // "EXPLORER" — large bottom line
     ctx.font      = '900 320px Inter, sans-serif';
-    ctx.fillText('EXPLORER', w / 2, h * 0.74);
+    ctx.fillText('DEEP DIVING', w / 2, h * 0.74);
   }
 
   // ── Front (main) layer — bright white with a soft outer glow ──
@@ -2719,7 +2719,7 @@ panelDesc.style.cssText = 'font-size:12px;line-height:1.7;color:#aaccdd;margin-b
 panel.appendChild(panelDesc);
 
 const panelCreatureTitle = document.createElement('div');
-panelCreatureTitle.textContent = 'NOTABLE SPECIES';
+panelCreatureTitle.textContent = 'ACTIVE ENTITIES';
 panelCreatureTitle.style.cssText = 'font-size:10px;letter-spacing:0.12em;color:#4488aa;margin-bottom:8px;font-weight:600;';
 panel.appendChild(panelCreatureTitle);
 
