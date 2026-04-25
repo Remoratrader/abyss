@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>INTERNET DEEP DIVING | Network Intelligence Visualization</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --accent: #00d4ff;
+      --accent-dim: rgba(0, 212, 255, 0.3);
+      --bg-glass: rgba(5, 12, 28, 0.85);
+      --border-glass: rgba(0, 212, 255, 0.2);
+      --text: #c8e8ff;
+      --danger: #ff0055;
+      --warning: #ffaa00;
+      --safe: #00ffa2;
+    }
+
+    * { margin: 0; padding: 0; outline: none !important; box-sizing: border-box; }
+    html, body, #root { width: 100%; height: 100%; overflow: hidden; background: #050811; color: var(--text); font-family: 'Inter', sans-serif; }
+    #root { position: relative; z-index: 1; }
+    canvas { display: block; outline: none !important; }
+    #canvas { position: absolute; top: 0; left: 0; }
+
+    /* ── UI Overlay ── */
+    #ui-overlay {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 380px;
+      height: 100%;
+      background: linear-gradient(to left, rgba(5, 10, 25, 0.95), rgba(5, 10, 25, 0.8));
+      backdrop-filter: blur(20px);
+      border-left: 1px solid var(--border-glass);
+      z-index: 1000;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    }
+
+    #ui-overlay.hidden {
+      transform: translateX(100%);
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      left: -40px;
+      width: 40px;
+      height: 40px;
+      background: var(--bg-glass);
+      border: 1px solid var(--border-glass);
+      border-right: none;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 20px;
+      border-radius: 8px 0 0 8px;
+    }
+
+    .layer-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 4px 12px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: -1px;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .classification {
+      font-size: 14px;
+      color: var(--accent);
+      opacity: 0.8;
+      border-bottom: 1px solid var(--border-glass);
+      padding-bottom: 12px;
+    }
+
+    .description {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #a0b0cc;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .stat-card {
+      background: rgba(255,255,255,0.03);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .stat-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #667788;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: #fff;
+    }
+
+    /* ── Risk Meter ── */
+    .risk-meter {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .risk-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 1s ease, background 1s ease;
+    }
+
+    .risk-low .risk-fill { background: var(--safe); box-shadow: 0 0 10px var(--safe); }
+    .risk-med .risk-fill { background: var(--warning); box-shadow: 0 0 10px var(--warning); }
+    .risk-high .risk-fill { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
+    .risk-critical .risk-fill { background: #ff00ff; box-shadow: 0 0 10px #ff00ff; }
+
+    /* ── Tech Stack ── */
+    .tech-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .lang-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      padding: 4px 10px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      color: #8899aa;
+    }
+
+    /* ── Animations ── */
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    .scanning {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .scan-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 1s infinite;
+    }
+
+    /* ── Scrollbar ── */
+    #ui-overlay::-webkit-scrollbar { width: 4px; }
+    #ui-overlay::-webkit-scrollbar-track { background: transparent; }
+    #ui-overlay::-webkit-scrollbar-thumb { background: var(--border-glass); border-radius: 2px; }
+  </style>
+</head>
+<body>
+  <div id="ui-overlay" class="hidden">
+    <div class="close-btn" id="close-btn">✕</div>
+    
+    <div class="scanning">
+      <div class="scan-dot"></div>
+      LINK_ESTABLISHED // SCANNING_DATALAYER...
+    </div>
+
+    <div id="layer-level" class="layer-badge">NODE 00</div>
+    
+    <div>
+      <h1 id="layer-title">INTERNET DEEP DIVING</h1>
+      <div id="layer-depth" class="classification">Initializing intelligence extraction...</div>
+    </div>
+
+    <div id="layer-desc" class="description">
+      Neural link active. Select a data layer to begin forensic analysis and packet sniffing.
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Threat Level</div>
+        <div id="risk-status" class="stat-value">NEUTRAL</div>
+        <div class="risk-meter"><div id="risk-fill" class="risk-fill"></div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Security Protocol</div>
+        <div class="stat-value">AES-256 / TOR</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="stat-label" style="margin-bottom: 12px;">Dominant Languages / Tech</div>
+      <div id="layer-languages" class="tech-stack">
+        <!-- Languages injected here -->
+      </div>
+    </div>
+  </div>
+
+  <div id="root"></div>
+  <script type="module" src="/scene.js"></script>
+</body>
+</html>
