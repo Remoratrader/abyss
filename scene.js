@@ -6,40 +6,106 @@ import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPa
 import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 
+import { VISUAL_CONFIG, PHYSICS_CONFIG } from './constants.js';
+import { SerafimLogger } from './logger.js';
+import { SerafimWatchdog } from './watchdog.js';
+import { SerafimTerminal } from './sterm.js';
+import { SerafimOnboarding } from './onboarding.js';
+import { translations, creatureNarratives } from './narratives.js';
+import { makeUserNode, makeServerRack } from './assets.js';
+
 // ─── Visual Constants ─────────────────────────────────────────────────────────
-const NV_FILTER         = 'grayscale(1) sepia(1) hue-rotate(90deg) brightness(1.55) contrast(1.1)'; // phosphor-green sensor cast applied to the canvas element
-const NV_AMBIENT_BOOST  = 2.5; // ambient light floor while NV is active — keeps deep zones legible
-const NV_EMISSIVE_BOOST = 3.2; // added to every mesh's emissiveIntensity to simulate phosphor glow
-const AMBIENT_NORMAL    = 0.62; // ambient ceiling in fully lit surface conditions
-const AMBIENT_DARK      = 0.09; // ambient floor when ROV descends into midnight/abyss darkness
-const ROV_POINT_NORMAL  = 2;    // ROV point-light intensity at the surface / shallow end
-const ROV_POINT_DARK    = 6.5;  // ROV point-light intensity at full depth-darkness blend
-const ROV_RANGE_NORMAL  = 3;    // ROV point-light reach (units) at the surface / shallow end
-const ROV_RANGE_DARK    = 5.5;  // ROV point-light reach (units) at full depth-darkness blend
-
-const ROV_VIGNETTE_GRADIENT = `radial-gradient(circle at center,
-    transparent 42%,
-    rgba(0,20,40,0.3) 58%,
-    rgba(0,0,0,0.45) 68%,
-    rgba(0,0,0,0.82) 85%,
-    rgba(0,0,0,0.96) 100%
-  )`; // dark ocean-blue tunnel vignette shown whenever ROV cam is active
-
-const NV_VIGNETTE_GRADIENT = `radial-gradient(circle at center,
-    transparent 38%,
-    rgba(0,8,0,0.25) 52%,
-    rgba(0,0,0,0.70) 70%,
-    rgba(0,0,0,0.97) 100%
-  )`; // tight green-black tube mask that simulates a night-vision monocular
+const { 
+  NV_FILTER, 
+  NV_AMBIENT_BOOST, 
+  NV_EMISSIVE_BOOST, 
+  AMBIENT_NORMAL, 
+  AMBIENT_DARK, 
+  ROV_POINT_NORMAL, 
+  ROV_POINT_DARK, 
+  ROV_RANGE_NORMAL, 
+  ROV_RANGE_DARK, 
+  ROV_VIGNETTE_GRADIENT,
+  NV_VIGNETTE_GRADIENT
+} = VISUAL_CONFIG;
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─── Scene Setup ───────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0d1628);
-scene.fog = new THREE.FogExp2(0x060d18, 0.017);;
+scene.background = new THREE.Color(0x0a0a0f);
+scene.fog = new THREE.FogExp2(0x060d18, 0.017);
 
 const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 500);
 camera.position.set(14, 5, 18);
+
+// --- Serafim Systems ---
+const watchdog = new SerafimWatchdog(null, scene);
+const terminal = new SerafimTerminal('sterm-container');
+const onboarding = new SerafimOnboarding();
+
+watchdog.runDiagnostics();
+setTimeout(() => onboarding.start(), 3000);
+
+// Tracking for population metrics
+const populationStats = {
+  total: 0,
+  users: 0,
+  infra: 0
+};
+
+function initPopulation() {
+  SerafimLogger.info('POPULATION: Initializing digital entities...');
+  
+  // Layer 0: Surface (85%) - High density, civilians and bots
+  for(let i = 0; i < 60; i++) {
+    const type = Math.random() > 0.8 ? 'bot' : 'user';
+    const node = makeUserNode(type, type === 'bot' ? 'Crawler_Bot' : 'Civilian_User');
+    node.position.set(Math.random() * 40 - 20, Math.random() * -10, Math.random() * 40 - 20);
+    scene.add(node);
+    populationStats.total++;
+    populationStats.users++;
+  }
+
+  // Layer 1: Midnight (12%) - Programmers and admins
+  for(let i = 0; i < 15; i++) {
+    const node = makeUserNode('user', 'Sys_Admin');
+    node.position.set(Math.random() * 30 - 15, -15 - Math.random() * 10, Math.random() * 30 - 15);
+    scene.add(node);
+    populationStats.total++;
+    populationStats.users++;
+  }
+
+  // Layer 2: Abyss (2.8%) - Hackers and APTs
+  for(let i = 0; i < 5; i++) {
+    const node = makeUserNode('hacker', 'Agente_APT');
+    node.position.set(Math.random() * 20 - 10, -30 - Math.random() * 15, Math.random() * 20 - 10);
+    scene.add(node);
+    populationStats.total++;
+    populationStats.users++;
+  }
+
+  // Layer 3: Infrastructure
+  for(let i = 0; i < 8; i++) {
+    const rack = makeServerRack();
+    rack.position.set(Math.random() * 25 - 12.5, -50 - Math.random() * 10, Math.random() * 25 - 12.5);
+    scene.add(rack);
+    populationStats.total++;
+    populationStats.infra++;
+  }
+
+  updateOverlayMetrics();
+}
+
+function updateOverlayMetrics() {
+  const pEl = document.getElementById('ui-population');
+  const uEl = document.getElementById('ui-users');
+  const iEl = document.getElementById('ui-infra');
+  if(pEl) pEl.textContent = `${populationStats.total} Entidades`;
+  if(uEl) uEl.textContent = populationStats.users;
+  if(iEl) iEl.textContent = populationStats.infra;
+}
+
+initPopulation();
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -3229,17 +3295,55 @@ renderer.domElement.addEventListener('click', (e) => {
   if (Math.sqrt(dx * dx + dy * dy) > 5) return;
 
   mouse.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
-  raycaster.setFromCamera(mouse, camera);
+  raycaster.setFromCamera(mouse, activeCamera);
 
-  const hits = raycaster.intersectObjects([...zoneBoxes, ...zonePickMeshes], false);
-  if (hits.length > 0) {
-    const zoneId = hits[0].object.userData.zoneId;
+  // 1. Check for Forensic Entities (Users, Servers)
+  const forensicHits = raycaster.intersectObjects(scene.children, true);
+  const forensicTarget = forensicHits.find(i => i.object.parent?.userData?.type || i.object.userData?.type);
+  
+  if (forensicTarget) {
+    const data = forensicTarget.object.parent?.userData?.type ? forensicTarget.object.parent.userData : forensicTarget.object.userData;
+    if (data.type === 'USER_NODE' || data.type === 'SERVER_RACK') {
+      showForensicData(data);
+      return; // Stop here if we hit a forensic entity
+    }
+  }
+
+  // 2. Fallback to Zone Picking
+  const zoneHits = raycaster.intersectObjects([...zoneBoxes, ...zonePickMeshes], false);
+  if (zoneHits.length > 0) {
+    const zoneId = zoneHits[0].object.userData.zoneId;
     if (selectedZone === zoneId) {
       deselectAll();
     } else {
       selectZone(zoneId);
     }
   }
+});
+
+function showForensicData(data) {
+  const overlay = document.getElementById('ui-overlay');
+  const title = document.getElementById('layer-title');
+  const desc = document.getElementById('layer-desc');
+  const level = document.getElementById('layer-level');
+  
+  const narrative = creatureNarratives.pt[data.type] || creatureNarratives.pt[data.nodeType] || { title: 'Unknown Entity', attack: 'Scanning...', defense: 'Evaluating...' };
+  
+  title.textContent = narrative.title || data.label || 'ENTITY_SCAN';
+  level.textContent = data.type || 'DIGITAL_TRACE';
+  
+  desc.innerHTML = `
+    <div style="margin-bottom: 15px; color: #ff0055; font-weight: bold;">[!] O ATAQUE:</div>
+    <div style="margin-bottom: 20px;">${narrative.attack}</div>
+    <div style="margin-bottom: 15px; color: #00ffa2; font-weight: bold;">[*] A DEFESA (SERAFIM):</div>
+    <div>${narrative.defense}</div>
+  `;
+  
+  overlay.classList.remove('hidden');
+}
+
+document.getElementById('close-btn')?.addEventListener('click', () => {
+  document.getElementById('ui-overlay').classList.add('hidden');
 });
 
 // Cursor style on hover — throttled to every 50ms to reduce raycast overhead
@@ -4378,6 +4482,11 @@ function animate() {
   // Nav rail live indicator
   updateNavRail();
 
+  // Interaction Logic (Raycasting)
+  if (_frameCount % 5 === 0) { // Throttled check for hover/selection readiness
+    raycaster.setFromCamera(mouse, activeCamera);
+  }
+
   // Smoothly lerp orbit cam target toward selected zone
   if (!rovCamActive) {
     controls.target.y += (targetControlsY - controls.target.y) * 0.06;
@@ -4391,6 +4500,9 @@ function animate() {
   // Update composer's render pass camera to match active camera (orbit or ROV)
   renderPass.camera = activeCamera;
   composer.render();
+  
+  if (watchdog) watchdog.update();
+  
   _frameCount++;
 }
 

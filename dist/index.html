@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-  <title>INTERNET DEEP DIVING | Network Intelligence Visualization</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Serafim Abyss | Protocol v2.7.1</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -126,7 +128,6 @@
       color: #fff;
     }
 
-    /* ── Risk Meter ── */
     .risk-meter {
       height: 6px;
       background: rgba(255,255,255,0.1);
@@ -146,7 +147,6 @@
     .risk-high .risk-fill { background: var(--danger); box-shadow: 0 0 10px var(--danger); }
     .risk-critical .risk-fill { background: #ff00ff; box-shadow: 0 0 10px #ff00ff; }
 
-    /* ── Tech Stack ── */
     .tech-stack {
       display: flex;
       flex-wrap: wrap;
@@ -163,7 +163,6 @@
       color: #8899aa;
     }
 
-    /* ── Animations ── */
     @keyframes pulse {
       0% { opacity: 0.4; }
       50% { opacity: 1; }
@@ -187,12 +186,43 @@
       animation: pulse 1s infinite;
     }
 
-    /* ── Scrollbar ── */
-    #ui-overlay::-webkit-scrollbar { width: 4px; }
-    #ui-overlay::-webkit-scrollbar-track { background: transparent; }
-    #ui-overlay::-webkit-scrollbar-thumb { background: var(--border-glass); border-radius: 2px; }
+    /* --- STERM Container --- */
+    #sterm-container {
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      width: 450px;
+      height: 320px;
+      background: rgba(5, 10, 20, 0.85);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      z-index: 2000;
+      backdrop-filter: blur(15px);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    #sterm-container.minimized { height: 40px; overflow: hidden; }
+    #sterm-container.expanded { width: 600px; height: 500px; }
+
+    .sterm-btn {
+      background: rgba(0, 212, 255, 0.1);
+      border: 1px solid rgba(0, 212, 255, 0.2);
+      color: #00d4ff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 9px;
+      font-family: 'JetBrains Mono', monospace;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sterm-btn:hover { background: #00d4ff; color: #000; }
+
   </style>
-  <script type="module" crossorigin src="/assets/index-CGBSsYZO.js"></script>
+  <script type="module" crossorigin src="/assets/index-ivTacDTB.js"></script>
 </head>
 <body>
   <div id="ui-overlay" class="hidden">
@@ -200,40 +230,51 @@
     
     <div class="scanning">
       <div class="scan-dot"></div>
-      LINK_ESTABLISHED // SCANNING_DATALAYER...
+      ROOT_ACCESS // SCANNING_NETWORK_LAYERS...
     </div>
 
-    <div id="layer-level" class="layer-badge">NODE 00</div>
+    <div id="layer-level" class="layer-badge">LAYER_00</div>
     
     <div>
-      <h1 id="layer-title">INTERNET DEEP DIVING</h1>
-      <div id="layer-depth" class="classification">Initializing intelligence extraction...</div>
+      <h1 id="layer-title">ABYSS PROTOCOL</h1>
+      <div id="layer-depth" class="classification">Initializing network forensic scan...</div>
     </div>
 
     <div id="layer-desc" class="description">
-      Neural link active. Select a data layer to begin forensic analysis and packet sniffing.
+      Acesso root estabelecido. Selecione uma camada de rede para iniciar a análise forense e interceptação de pacotes.
     </div>
 
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-label">Threat Level</div>
-        <div id="risk-status" class="stat-value">NEUTRAL</div>
+        <div id="risk-status" class="stat-value">NOMINAL</div>
         <div class="risk-meter"><div id="risk-fill" class="risk-fill"></div></div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Security Protocol</div>
-        <div class="stat-value">AES-256 / TOR</div>
+        <div class="stat-label">Population Density</div>
+        <div id="ui-population" class="stat-value">0 Entidades</div>
+      </div>
+    </div>
+
+    <div class="stats-grid" style="margin-top: -8px;">
+      <div class="stat-card">
+        <div class="stat-label">Active Users</div>
+        <div id="ui-users" class="stat-value">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Infrastructure Nodes</div>
+        <div id="ui-infra" class="stat-value">0</div>
       </div>
     </div>
 
     <div>
-      <div class="stat-label" style="margin-bottom: 12px;">Dominant Languages / Tech</div>
-      <div id="layer-languages" class="tech-stack">
-        <!-- Languages injected here -->
-      </div>
+      <div class="stat-label" style="margin-bottom: 12px;">Active Protocols / Technologies</div>
+      <div id="layer-languages" class="tech-stack"></div>
     </div>
   </div>
 
+  <div id="sterm-container"></div>
   <div id="root"></div>
+  
 </body>
 </html>
